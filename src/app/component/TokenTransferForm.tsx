@@ -1,6 +1,7 @@
 'use client'
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useToast } from "@/components/ui/use-toast"
 import { z } from 'zod'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { zodResolver } from '@hookform/resolvers/zod';
-
+import { Window as KeplrWindow } from "@keplr-wallet/types";
+import { ToastAction } from '@/components/ui/toast';
 
 const formSchema = z.object({
     chain: z.enum(["Osmosis", "UX Chain", "Ethereum", 'Polygon'], {
@@ -29,10 +31,27 @@ const formSchema = z.object({
 
 // export type TokenTransferParam = z.infer<typeof formSchema>
 
-const TokenTransferForm = () => {
+declare global {
+    interface Window extends KeplrWindow { }
+}
 
-    const handleTransfer = () => {
-        // onTransfer({ chain, token, address, amount });
+const TokenTransferForm = () => {
+    const { toast } = useToast()
+    const handleTransfer = (data: any) => {
+        const { chain, token, recipientAddress, amount } = data
+        if (token === "OSMO" || token === "UX" || token === "ATOM") {
+            if (!window.keplr) {
+                toast({
+                    title: "Keplr Wallet Not Found",
+                    description: "Click the link to download wallet",
+                    action: <ToastAction onClick={() => window?.open('https://www.keplr.app/download', '_blank')} altText="Try again">Download</ToastAction>,
+                })
+
+            }
+            
+        }
+
+
     };
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -46,7 +65,7 @@ const TokenTransferForm = () => {
     return (
         <Card className='w-full md:w-3/6'>
             <CardHeader>
-                <CardTitle className='text-center'>Transfer Token</CardTitle>
+                <CardTitle className='text-center font-bold'>Transfer Token</CardTitle>
             </CardHeader>
             <CardContent>
                 <Form {...form} >
