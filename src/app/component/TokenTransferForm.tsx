@@ -44,7 +44,7 @@ const TokenTransferForm = () => {
         },
     })
     return (
-        <Card className='  w-full md:w-3/6'>
+        <Card className='w-full md:w-3/6'>
             <CardHeader>
                 <CardTitle className='text-center'>Transfer Token</CardTitle>
             </CardHeader>
