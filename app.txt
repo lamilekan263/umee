@@ -1,0 +1,553 @@
+Certainly! I'll create a web app using TypeScript and React as the frontend framework. This app will allow users to transfer tokens on different chains using Keplr and MetaMask wallet extensions. Here's a basic structure and implementation for the web app:
+
+First, let's set up the project:
+
+```bash
+npx create-react-app token-transfer-app --template typescript
+cd token-transfer-app
+npm install @cosmjs/stargate @cosmjs/proto-signing @metamask/detect-provider ethers
+```
+
+Now, let's create the main components and functionality:
+
+1. App.tsx
+```tsx
+import React, { useState } from 'react';
+import ChainSelector from './components/ChainSelector';
+import TokenSelector from './components/TokenSelector';
+import TransferForm from './components/TransferForm';
+import WalletConnector from './components/WalletConnector';
+import { Chain, Token } from './types';
+
+const App: React.FC = () => {
+  const [selectedChain, setSelectedChain] = useState<Chain | null>(null);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  return (
+    <div className="App">
+      <h1>Token Transfer App</h1>
+      <WalletConnector setWalletAddress={setWalletAddress} />
+      <ChainSelector setSelectedChain={setSelectedChain} />
+      {selectedChain && (
+        <TokenSelector
+          chain={selectedChain}
+          setSelectedToken={setSelectedToken}
+        />
+      )}
+      {selectedChain && selectedToken && walletAddress && (
+        <TransferForm
+          chain={selectedChain}
+          token={selectedToken}
+          walletAddress={walletAddress}
+        />
+      )}
+    </div>
+  );
+};
+
+export default App;
+```
+
+2. types.ts
+```typescript
+export interface Chain {
+  id: string;
+  name: string;
+  rpcUrl: string;
+  chainId: string;
+}
+
+export interface Token {
+  symbol: string;
+  address: string;
+  decimals: number;
+}
+```
+
+3. components/ChainSelector.tsx
+```tsx
+import React from 'react';
+import { Chain } from '../types';
+
+const chains: Chain[] = [
+  { id: 'ux', name: 'UX Chain', rpcUrl: 'https://ux-testnet-rpc.example.com', chainId: 'ux-testnet-1' },
+  { id: 'osmosis', name: 'Osmosis', rpcUrl: 'https://osmosis-testnet-rpc.example.com', chainId: 'osmosis-testnet-1' },
+  { id: 'ethereum', name: 'Ethereum', rpcUrl: 'https://goerli.infura.io/v3/YOUR-PROJECT-ID', chainId: '5' },
+  { id: 'polygon', name: 'Polygon', rpcUrl: 'https://polygon-mumbai.infura.io/v3/YOUR-PROJECT-ID', chainId: '80001' },
+];
+
+interface Props {
+  setSelectedChain: (chain: Chain) => void;
+}
+
+const ChainSelector: React.FC<Props> = ({ setSelectedChain }) => {
+  return (
+    <div>
+      <h2>Select Chain</h2>
+      {chains.map((chain) => (
+        <button key={chain.id} onClick={() => setSelectedChain(chain)}>
+          {chain.name}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+export default ChainSelector;
+```
+
+4. components/TokenSelector.tsx
+```tsx
+import React from 'react';
+import { Chain, Token } from '../types';
+
+const tokens: { [chainId: string]: Token[] } = {
+  'ux': [
+    { symbol: 'UX', address: '0x...', decimals: 18 },
+    { symbol: 'USDC', address: '0
+
+
+Certainly! I'll complete the TokenSelector component and add the remaining components to finish the web app.
+
+4. components/TokenSelector.tsx (continued)
+```tsx
+import React from 'react';
+import { Chain, Token } from '../types';
+
+const tokens: { [chainId: string]: Token[] } = {
+  'ux': [
+    { symbol: 'UX', address: '0x...', decimals: 18 },
+    { symbol: 'USDC', address: '0x...', decimals: 6 },
+    { symbol: 'ATOM', address: '0x...', decimals: 6 },
+  ],
+  'osmosis': [
+    { symbol: 'OSMO', address: '0x...', decimals: 6 },
+    { symbol: 'ATOM', address: '0x...', decimals: 6 },
+    { symbol: 'UX', address: '0x...', decimals: 18 },
+  ],
+  'ethereum': [
+    { symbol: 'ETH', address: '0x...', decimals: 18 },
+    { symbol: 'USDC', address: '0x...', decimals: 6 },
+    { symbol: 'USDT', address: '0x...', decimals: 6 },
+  ],
+  'polygon': [
+    { symbol: 'MATIC', address: '0x...', decimals: 18 },
+    { symbol: 'USDC', address: '0x...', decimals: 6 },
+    { symbol: 'WETH', address: '0x...', decimals: 18 },
+  ],
+};
+
+interface Props {
+  chain: Chain;
+  setSelectedToken: (token: Token) => void;
+}
+
+const TokenSelector: React.FC<Props> = ({ chain, setSelectedToken }) => {
+  const chainTokens = tokens[chain.id];
+
+  return (
+    <div>
+      <h2>Select Token</h2>
+      {chainTokens.map((token) => (
+        <button key={token.symbol} onClick={() => setSelectedToken(token)}>
+          {token.symbol}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+export default TokenSelector;
+```
+
+5. components/WalletConnector.tsx
+```tsx
+import React from 'react';
+import { connectKeplr } from '../utils/keplr';
+import { connectMetamask } from '../utils/metamask';
+
+interface Props {
+  setWalletAddress: (address: string) => void;
+}
+
+const WalletConnector: React.FC<Props> = ({ setWalletAddress }) => {
+  const handleKeplrConnect = async () => {
+    try {
+      const address = await connectKeplr();
+      setWalletAddress(address);
+    } catch (error) {
+      console.error('Failed to connect Keplr:', error);
+    }
+  };
+
+  const handleMetamaskConnect = async () => {
+    try {
+      const address = await connectMetamask();
+      setWalletAddress(address);
+    } catch (error) {
+      console.error('Failed to connect MetaMask:', error);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Connect Wallet</h2>
+      <button onClick={handleKeplrConnect}>Connect Keplr</button>
+      <button onClick={handleMetamaskConnect}>Connect MetaMask</button>
+    </div>
+  );
+};
+
+export default WalletConnector;
+```
+
+6. components/TransferForm.tsx
+```tsx
+import React, { useState } from 'react';
+import { Chain, Token } from '../types';
+import { transferTokens } from '../utils/transfer';
+
+interface Props {
+  chain: Chain;
+  token: Token;
+  walletAddress: string;
+}
+
+const TransferForm: React.FC<Props> = ({ chain, token, walletAddress }) => {
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
+
+
+
+
+  Certainly! I'll continue with the TransferForm component and add the necessary utility functions.
+
+6. components/TransferForm.tsx (continued)
+```tsx
+import React, { useState } from 'react';
+import { Chain, Token } from '../types';
+import { transferTokens } from '../utils/transfer';
+
+interface Props {
+  chain: Chain;
+  token: Token;
+  walletAddress: string;
+}
+
+const TransferForm: React.FC<Props> = ({ chain, token, walletAddress }) => {
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await transferTokens(chain, token, walletAddress, recipient, amount);
+      alert('Transfer successful!');
+      setRecipient('');
+      setAmount('');
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h2>Transfer {token.symbol}</h2>
+      <div>
+        <label htmlFor="recipient">Recipient Address:</label>
+        <input
+          type="text"
+          id="recipient"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="amount">Amount:</label>
+        <input
+          type="number"
+          id="amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          min="0"
+          step="any"
+          required
+        />
+      </div>
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? 'Transferring...' : 'Transfer'}
+      </button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+    </form>
+  );
+};
+
+export default TransferForm;
+```
+
+Now, let's add the utility functions for wallet connections and token transfers:
+
+7. utils/keplr.ts
+```typescript
+import { Chain } from '../types';
+
+export const connectKeplr = async (): Promise<string> => {
+  if (!window.keplr) {
+    throw new Error('Keplr extension not found');
+  }
+
+  await window.keplr.enable('osmosis-1');
+  const offlineSigner = window.keplr.getOfflineSigner('osmosis-1');
+  const accounts = await offlineSigner.getAccounts();
+  return accounts[0].address;
+};
+
+export const getKeplrSigner = async (chain: Chain) => {
+  if (!window.keplr) {
+    throw new Error('Keplr extension not found');
+  }
+
+  await window.keplr.enable(chain.chainId);
+  return window.keplr.getOfflineSigner(chain.chainId);
+};
+```
+
+8. utils/metamask.ts
+```typescript
+import detectEthereumProvider from '@metamask/detect-provider';
+import { ethers } from 'ethers';
+
+export const connectMetamask = async (): Promise<string> => {
+  const provider = await detectEthereumProvider();
+
+  if (!provider) {
+    throw new Error('MetaMask extension not found');
+  }
+
+  await provider.request({ method: 'eth_requestAccounts' });
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  const signer = ethersProvider.getSigner();
+  return await signer.getAddress();
+};
+
+export const getMetamaskSigner = async () => {
+  const provider = await detectEthereumProvider();
+
+  if (!provider) {
+    throw new Error
+
+Certainly! I'll continue with the MetaMask utility function and add the transfer utility function.
+
+8. utils/metamask.ts (continued)
+```typescript
+import detectEthereumProvider from '@metamask/detect-provider';
+import { ethers } from 'ethers';
+
+export const connectMetamask = async (): Promise<string> => {
+  const provider = await detectEthereumProvider();
+
+  if (!provider) {
+    throw new Error('MetaMask extension not found');
+  }
+
+  await provider.request({ method: 'eth_requestAccounts' });
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  const signer = ethersProvider.getSigner();
+  return await signer.getAddress();
+};
+
+export const getMetamaskSigner = async () => {
+  const provider = await detectEthereumProvider();
+
+  if (!provider) {
+    throw new Error('MetaMask extension not found');
+  }
+
+  await provider.request({ method: 'eth_requestAccounts' });
+  const ethersProvider = new ethers.providers.Web3Provider(provider);
+  return ethersProvider.getSigner();
+};
+```
+
+9. utils/transfer.ts
+```typescript
+import { Chain, Token } from '../types';
+import { getKeplrSigner } from './keplr';
+import { getMetamaskSigner } from './metamask';
+import { StargateClient, SigningStargateClient } from '@cosmjs/stargate';
+import { ethers } from 'ethers';
+
+export const transferTokens = async (
+  chain: Chain,
+  token: Token,
+  from: string,
+  to: string,
+  amount: string
+) => {
+  if (chain.id === 'ux' || chain.id === 'osmosis') {
+    return transferCosmosTokens(chain, token, from, to, amount);
+  } else {
+    return transferEVMTokens(chain, token, from, to, amount);
+  }
+};
+
+const transferCosmosTokens = async (
+  chain: Chain,
+  token: Token,
+  from: string,
+  to: string,
+  amount: string
+) => {
+  const signer = await getKeplrSigner(chain);
+  const client = await SigningStargateClient.connectWithSigner(chain.rpcUrl, signer);
+
+  const amountInSmallestUnit = Math.floor(parseFloat(amount) * Math.pow(10, token.decimals));
+  const msg = {
+    typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+    value: {
+      fromAddress: from,
+      toAddress: to,
+      amount: [{ denom: token.symbol.toLowerCase(), amount: amountInSmallestUnit.toString() }],
+    },
+  };
+
+  const fee = {
+    amount: [{ denom: token.symbol.toLowerCase(), amount: '5000' }],
+    gas: '200000',
+  };
+
+  const result = await client.signAndBroadcast(from, [msg], fee);
+  if (result.code !== 0) {
+    throw new Error(`Transaction failed: ${result.rawLog}`);
+  }
+  return result.transactionHash;
+};
+
+const transferEVMTokens = async (
+  chain: Chain,
+  token: Token,
+  from: string,
+  to: string,
+  amount: string
+) => {
+  const signer = await getMetamaskSigner();
+  const amountInWei = ethers.utils.parseUnits(amount, token.decimals);
+
+  if (token.symbol === 'ETH' || token.symbol === 'MATIC') {
+    const tx = await signer.sendTransaction({
+      to,
+      value: amountInWei,
+    });
+    await tx.wait();
+    return tx.hash;
+  } else {
+    const erc20Abi = [
+      'function transfer(address to, uint256 amount) returns (bool)',
+    ];
+    const contract = new ethers.Contract(token.address, erc20Abi, signer);
+Certainly! I'll finish the transfer utility function and add some additional types and declarations to complete the app.
+
+utils/transfer.ts (continued)
+
+typescriptCopy    const tx = await contract.transfer(to, amountInWei);
+    await tx.wait();
+    return tx.hash;
+  }
+};
+Now, let's add some additional type declarations to make TypeScript happy:
+
+types/global.d.ts
+
+typescriptCopyimport { Window as KeplrWindow } from "@keplr-wallet/types";
+
+declare global {
+  interface Window extends KeplrWindow {}
+}
+
+Update the tsconfig.json file to include the new type declaration:
+
+jsonCopy{
+  "compilerOptions": {
+    // ... other options
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  // ... other configurations
+}
+Finally, let's update the App.tsx to handle wallet disconnection:
+
+App.tsx (updated)
+
+tsxCopyimport React, { useState } from 'react';
+import ChainSelector from './components/ChainSelector';
+import TokenSelector from './components/TokenSelector';
+import TransferForm from './components/TransferForm';
+import WalletConnector from './components/WalletConnector';
+import { Chain, Token } from './types';
+
+const App: React.FC = () => {
+  const [selectedChain, setSelectedChain] = useState<Chain | null>(null);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  const handleDisconnect = () => {
+    setWalletAddress(null);
+    setSelectedChain(null);
+    setSelectedToken(null);
+  };
+
+  return (
+    <div className="App">
+      <h1>Token Transfer App</h1>
+      {walletAddress ? (
+        <>
+          <p>Connected: {walletAddress}</p>
+          <button onClick={handleDisconnect}>Disconnect</button>
+          <ChainSelector setSelectedChain={setSelectedChain} />
+          {selectedChain && (
+            <TokenSelector
+              chain={selectedChain}
+              setSelectedToken={setSelectedToken}
+            />
+          )}
+          {selectedChain && selectedToken && (
+            <TransferForm
+              chain={selectedChain}
+              token={selectedToken}
+              walletAddress={walletAddress}
+            />
+          )}
+        </>
+      ) : (
+        <WalletConnector setWalletAddress={setWalletAddress} />
+      )}
+    </div>
+  );
+};
+
+export default App;
+This completes the basic structure of the web app. Here's a summary of what we've created:
+
+A main App component that manages the overall state and renders child components.
+ChainSelector component for selecting the blockchain network.
+TokenSelector component for selecting the token to transfer.
+WalletConnector component for connecting to Keplr or MetaMask wallets.
+TransferForm component for inputting transfer details and executing the transfer.
+Utility functions for connecting to wallets and performing token transfers.
+
+To run the app, you'll need to:
+
+Install the required dependencies.
+Set up the appropriate RPC URLs and contract addresses for each network and token.
+Ensure you have Keplr and MetaMask extensions installed in your browser.
+Run the app using npm start or yarn start.
+
+Remember to handle errors gracefully, add proper loading states, and implement additional security measures before deploying this app to production. Also, make sure to test thoroughly on testnets before using it with real tokens on mainnets.
