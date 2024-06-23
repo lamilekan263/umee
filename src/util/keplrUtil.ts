@@ -1,4 +1,5 @@
-import { getChain } from '@/config';
+
+import { getChain } from '@/data/chain';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 

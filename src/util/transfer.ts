@@ -5,7 +5,8 @@ import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 import { Token, TransferInterface } from '../types';
 import { getKeplrSigningClientAndAddress } from './keplrUtil';
 import { getMetamaskSigner } from './metamaskUtil';
-import { erc20ABi, getToken } from '@/config';
+import { erc20ABi, getToken } from '@/data/tokens';
+
 
 
 export const transferCosmosTokens = async (

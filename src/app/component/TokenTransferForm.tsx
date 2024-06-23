@@ -12,8 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToastAction } from '@/components/ui/toast';
 
-import { chains, tokens } from '@/config';
+
 import { transferCosmosTokens, transferEVMTokens } from '@/util/transfer';
+import { tokens } from '@/data/tokens';
+import { chains } from '@/data/chain';
 
 
 // form schema
