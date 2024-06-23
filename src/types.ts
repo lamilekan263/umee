@@ -12,15 +12,8 @@ export interface Token {
   decimals: number;
 }
 
-export interface CosmosTransferInterface {
+export interface TransferInterface {
     chain: string,
-    token: Token,
-    to: string,
-    amount: string
-}
-
-export interface EVMTransferInterface {
-  
     token: Token,
     to: string,
     amount: string

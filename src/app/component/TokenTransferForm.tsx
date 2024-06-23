@@ -16,7 +16,7 @@ import { chains, tokens } from '@/config';
 import { transferCosmosTokens, transferEVMTokens } from '@/util/transfer';
 
 
-// form chema
+// form schema
 const formSchema = z.object({
     chain: z.enum(['ux', 'osmosis', 'ethereum', 'polygon']),
     token: z.enum(["UX", "ATOM", "OSMO", "ETH", "USDC", "USDT", "MATIC", "WETH", "AKT"]),
@@ -58,7 +58,7 @@ const TokenTransferForm = () => {
 
             } else {
 
-                if (!window.metamask) {
+                if (!window.ethereum) {
                     return toast({
                         variant: "destructive",
                         title: "Metamask Wallet Not Found",
@@ -67,7 +67,7 @@ const TokenTransferForm = () => {
                     })
                 }
                 setIsLoading(true)
-                const result = await transferEVMTokens({ amount, token, to: recipientAddress })
+                const result = await transferEVMTokens({ chain, token, to: recipientAddress, amount })
                 toast({
                     title: "Success",
                     description: `Your Transaction was successfully sent on ${result}`,

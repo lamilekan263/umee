@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import {  coins, MsgSendEncodeObject } from '@cosmjs/stargate';
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 
-import {  CosmosTransferInterface, EVMTransferInterface, Token } from '../types';
+import {   Token, TransferInterface } from '../types';
 import {  getKeplrSigningClientAndAddress } from './keplrUtil';
 import { getMetamaskSigner } from './metamaskUtil';
 import { erc20ABi, getToken } from '@/config';
@@ -12,7 +12,7 @@ export const transferCosmosTokens = async (
     { chain,
         token,
         to,
-        amount }: CosmosTransferInterface
+        amount }: TransferInterface
 ) => {
     
      const {client, address} = await getKeplrSigningClientAndAddress(chain);
@@ -48,28 +48,34 @@ export const transferCosmosTokens = async (
 
 
 export const transferEVMTokens = async (
-    { 
-        token,
-        to,
-        amount 
-    }: EVMTransferInterface
+  {chain, token, to, amount }: TransferInterface
 ) => {
+    try {
+        token = getToken({chainId:chain, tokenSymbol:token} )
     const signer = await getMetamaskSigner();
-    const amountInWei = ethers.utils.parseUnits(amount, token.decimals);
+    const amountInWei = ethers.parseUnits(amount, token.decimals);
 
     if (token.address === 'native') {
-        const tx = await signer.sendTransaction({
-            to,
-            value: amountInWei,
-        });
-        await tx.wait();
-        return tx.hash;
+      const tx = await signer.sendTransaction({
+        to,
+        value: amountInWei,
+      });
+      await tx.wait();
+      return tx.hash;
     } else {
-        const erc20Abi = erc20ABi
+      if (!ethers.isAddress(token.address)) {
+        throw new Error(`Invalid token address: ${token.address}`);
+      }
 
-        const contract = new ethers.Contract(token.address, erc20Abi, signer);
-        const tx = await contract.transfer(to, amountInWei);
-        await tx.wait();
-        return tx.hash;
+
+      const contract = new ethers.Contract(token.address, erc20ABi, signer);
+
+      const tx = await contract.transfer(to, amountInWei);
+      await tx.wait();
+      return tx.hash;
     }
+  } catch (error) {
+    console.error('Error in transferEVMTokens:', error);
+    throw error;
+  }
 };

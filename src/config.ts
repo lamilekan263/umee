@@ -17,14 +17,14 @@ export const chains: Chain[] = [
     },
     {
         id: 'ethereum',
-        name: 'Ethereum Goerli',
-        rpcUrl: 'https://goerli.infura.io/v3/YOUR-PROJECT-ID',
-        chainId: '5',
+        name: 'Ethereum Sepolia',
+        rpcUrl: `https://sepolia.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_API}`,
+        chainId: '11155111',
     },
     {
         id: 'polygon',
-        name: 'Polygon Mumbai',
-        rpcUrl: 'https://rpc-mumbai.maticvigil.com',
+        name: 'Polygon Amoy',
+        rpcUrl:  `https://polygon-amoy.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_API}`,
         chainId: '80001',
     },
 ];
