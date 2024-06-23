@@ -14,7 +14,7 @@ export interface Token {
 
 export interface TransferInterface {
     chain: string,
-    token: Token,
+    token: string,
     to: string,
     amount: string
 }

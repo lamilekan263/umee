@@ -1,11 +1,79 @@
 import { Chain, Token } from './types';
 
+export const chainList = [
+    {
+        id: 1,
+        chain_name: "umee",
+        pretty_name: "UX Chain",
+        chain_id: "umee-1",
+        denom: "uumee",
+        sourceChannel: "channel-0",
+        tokens: [
+            { denom: 'uosmo', label: 'OSMO' },
+            { denom: 'uatom', label: 'ATOM' },
+            { denom: 'uumee', label: 'UMEE' },
+        ],
+        rpcUrl: "https://umee-testnet.rpc.l0vd.com",
+
+    },
+    {
+        id: 2,
+        chain_name: "osmosis",
+        pretty_name: "Osmosis",
+        chain_id: "osmo-test-5",
+        // chain_id: 'osmosis-1',
+        denom: "uosmo",
+        sourceChannel: "channel-1",
+        tokens: [
+            { denom: 'uosmo', label: 'OSMO' },
+            { denom: 'uatom', label: 'ATOM' },
+            { denom: 'uumee', label: 'UMEE' },
+        ],
+        // rpcUrl: "https://rpc.osmosis.zone",
+        //  rpcUrl: "https://rpc.testnet.osmosis.zone",
+        rpcUrl: "https://osmosis-testnet-rpc.polkachu.com",
+
+    },
+    {
+        id: 3,
+        chain_name: "ethereum",
+        pretty_name: "Ethereum",
+        chain_id: "1",
+        sourceChannel: "channel-3",
+        denom: "wei",
+        rpcUrl: 'https://goerli.blockpi.network/v1/rpc/public',
+        tokens: [
+            { denom: 'eth', label: 'ETH' },
+            { denom: 'usdc', label: 'USDC' },
+            { denom: 'usdt', label: 'USDT' },
+        ],
+
+    },
+    {
+        id: 4,
+        chain_name: "polygon",
+        pretty_name: "Polygon",
+        chain_id: "137",
+        sourceChannel: "channel-4",
+        rpcUrl: 'https://polygon-testnet.public.blastapi.io',
+        denom: "pol",
+        tokens: [
+            { denom: 'mat', label: 'MATIC' },
+            { denom: 'usdc', label: 'USDC' },
+            { denom: 'usdt', label: 'USDT' },
+        ],
+
+    },
+
+
+]
+
 export const chains: Chain[] = [
     {
         id: 'ux',
         name: 'UX Chain Testnet',
-        rpcUrl: 'https://ux-testnet-rpc.example.com',
-        chainId: 'ux-testnet-1',
+        rpcUrl: 'https://umee-testnet.rpc.l0vd.com',
+        chainId: 'umee-1',
         bech32Prefix: 'ux',
     },
     {
@@ -33,14 +101,14 @@ export const getChain = (id: string) => chains.find(chain => chain.id === id)
 
 export const tokens: { [chainId: string]: Token[] } = {
     'ux': [
-        { symbol: 'UX', address: 'ux1234...', decimals: 6 },
-        { symbol: 'USDC', address: 'ux5678...', decimals: 6 },
-        { symbol: 'ATOM', address: 'ux9012...', decimals: 6 },
+        { symbol: 'OSMO', address: 'uosmo', decimals: 6 },
+        { symbol: 'ATOM', address: 'uatom', decimals: 6 },
+        { symbol: 'UX', address: 'uumee', decimals: 6 },
     ],
     'osmosis': [
         { symbol: 'OSMO', address: 'uosmo', decimals: 6 },
         { symbol: 'ATOM', address: 'uatom', decimals: 6 },
-        { symbol: 'AKT', address: 'uakt', decimals: 6 },
+         { symbol: 'UX', address: 'uumee', decimals: 6 },
     ],
     'ethereum': [
         { symbol: 'ETH', address: 'native', decimals: 18 },
@@ -60,8 +128,12 @@ interface GetTokenParams {
     tokenSymbol: string;
 }
 
-export const getToken = ({ chainId, tokenSymbol }: GetTokenParams): Token | undefined => {
-    return tokens[chainId]?.find(token => token.symbol === tokenSymbol);
+export const getToken = ({ chainId, tokenSymbol }: GetTokenParams): Token  => {
+    const token = tokens[chainId]?.find(token => token.symbol === tokenSymbol);
+      if (!token) {
+        throw new Error(`Token not found for chainId: ${chainId} and tokenSymbol: ${tokenSymbol}`);
+      }
+    return token;
 };
 
 // getTokenInterface
