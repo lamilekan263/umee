@@ -19,7 +19,7 @@ import { transferCosmosTokens, transferEVMTokens } from '@/util/transfer';
 // form schema
 const formSchema = z.object({
     chain: z.enum(['ux', 'osmosis', 'ethereum', 'polygon']),
-    token: z.enum(["UX", "ATOM", "OSMO", "ETH", "USDC", "USDT", "MATIC", "WETH", "AKT"]),
+    token: z.enum(["UX", "ATOM", "OSMO", "ETH", "USDC", "USDT", "MATIC", "WETH"]),
     recipientAddress: z.string().min(5, "Recipient address should be greater than 5"),
     amount: z.string({
         required_error: "amount is required",
